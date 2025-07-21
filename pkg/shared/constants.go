@@ -34,7 +34,4 @@ const (
 
 	// DefaultHomeDir is the default home directory
 	DefaultHomeDir = "/root"
-
-	// VerifierLogFile is the path to the verifier log file
-	VerifierLogFile = SharedVolumeMountPath + SharedVolumeMountPath + "ratify-verifier.log"
 )
