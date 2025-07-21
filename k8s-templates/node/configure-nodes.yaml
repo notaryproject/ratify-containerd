@@ -1,0 +1,104 @@
+# Upgrades/installs all components for ratify containerd plugin
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nsenter-actions
+  labels:
+    app: nsenter
+data:
+  containerd-upgrade: |
+    #!/usr/bin/env bash
+    set -xe
+
+    if [[ -f /opt/sentinel ]]; then
+       if [[ ! -z "$1" ]]; then
+         echo "received positional argument, forcing cleanup"
+         rm /opt/sentinel || true
+       else
+         echo "Already ran, exiting"
+         exit 0
+       fi
+    fi
+
+    # Install container version from https://github.com/containerd/containerd/pull/8515
+    mkdir -p ~/bin
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/containerd --output ~/bin/containerd
+    mv ~/bin/* /usr/bin/
+    chmod +x /usr/bin/containerd
+    rm -rf ~/bin
+
+    # Install jq
+    curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 --output /usr/bin/jq && chmod +x /usr/bin/jq
+
+    # Install dasel
+    curl -L https://github.com/TomWright/dasel/releases/download/v2.8.1/dasel_linux_amd64 --output /usr/bin/dasel && chmod +x /usr/bin/dasel
+
+    # Install Ratify binaries
+    mkdir -p ~/.ratify/bin
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/ratify -o ~/.ratify/bin/ratify
+    chmod +x ~/.ratify/bin/ratify
+
+    # Install Ratify configuration files
+    mkdir -p ~/.ratify/bin/certs
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/config.json -o ~/.ratify/bin/config.json
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/notation-test.crt -o ~/.ratify/bin/certs/notation-test.crt
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/policy.rego -o ~/.ratify/bin/policy.rego
+
+    # Install Ratify Containerd plugin
+    mkdir -p ~/.containerd/verification-plugin-bin
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/verifier -o ~/.containerd/verification-plugin-bin/verifier
+    chmod +x ~/.containerd/verification-plugin-bin/verifier
+    
+    # Update containerd config
+    dasel put -f /etc/containerd/config.toml -r toml '.plugins.io\.containerd\.image-verifier\.v1\.bindir.bin_dir' -t string -v '/root/.containerd/verification-plugin-bin'
+    dasel put -f /etc/containerd/config.toml -r toml '.plugins.io\.containerd\.image-verifier\.v1\.bindir.max_verifiers' -t int -v '10'
+    dasel put -f /etc/containerd/config.toml -r toml '.plugins.io\.containerd\.image-verifier\.v1\.bindir.verifier_timeout' -t string -v '10s'
+
+    touch /opt/sentinel
+    systemctl restart containerd
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: &name containerd-upgrade
+  labels:
+    app: *name
+spec:
+  selector:
+    matchLabels:
+      app: *name
+  template:
+    metadata:
+      labels:
+        app: *name
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - image: docker.io/alexeldeib/nsenter:latest # https://github.com/alexeldeib/azbench/blob/main/images/nsenter/entrypoint.sh
+        imagePullPolicy: Always
+        name: *name
+        args: ["containerd-upgrade"]
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 2000Mi
+          limits:
+            cpu: 0.5
+            memory: 2000Mi
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: actions
+          mountPath: "/opt/actions"
+        - name: hostmount
+          mountPath: "/mnt/actions"
+      volumes:
+      - name: hostmount
+        hostPath:
+          path: /opt/actions
+          type: DirectoryOrCreate
+      - name: actions
+        configMap:
+          name: nsenter-actions
