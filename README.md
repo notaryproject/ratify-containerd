@@ -60,17 +60,17 @@ graph TD
 1. Setup monitor daemon
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor-role.yaml
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor-rolebinding.yaml
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor-serviceaccount.yaml
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/config-monitor/config-monitor-role.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/config-monitor/config-monitor-rolebinding.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/config-monitor/config-monitor-serviceaccount.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/config-monitor/config-monitor.yaml
     ```
 
 1. Setup node with required binaries. Wait for 30-40 seconds for daemonset to complete (Note: daemonset pods will not terminate. check logs for completion)
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/node/clusterrolebinding.yaml
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/node/configure-nodes.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/node/clusterrolebinding.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/node/configure-nodes.yaml
     ```
 
 #### Post Setup
@@ -92,7 +92,7 @@ graph TD
 1. Install scoped config map
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/scoped-config/scoped-config.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/k8s-templates/scoped-config/scoped-config.yaml
     kubectl get configmap scoped-config-azurearck8s-metrics-agent -o jsonpath="{.data}"
     ```
 
@@ -108,8 +108,8 @@ graph TD
 1. In-scope image verification will be enforced
 
     ```bash
-    kubectl run demo-unsigned --image=ghcr.io/qweeah/ratify/notary-image:unsigned
-    kubectl describe pod demo-unsigned
+    kubectl run demo-inscope-unsigned --image=ghcr.io/qweeah/ratify/notary-image:unsigned
+    kubectl describe pod demo-inscope-unsigned
     ```
 
 ## Code of Conduct

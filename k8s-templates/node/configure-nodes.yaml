@@ -23,7 +23,7 @@ data:
 
     # Install container version from https://github.com/containerd/containerd/pull/8515
     mkdir -p ~/bin
-    curl -L https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/bin/containerd --output ~/bin/containerd
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/containerd --output ~/bin/containerd
     mv ~/bin/* /usr/bin/
     chmod +x /usr/bin/containerd
     rm -rf ~/bin
@@ -36,18 +36,18 @@ data:
 
     # Install Ratify binaries
     mkdir -p ~/.ratify/bin
-    curl -L https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/bin/ratify -o ~/.ratify/bin/ratify
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/ratify -o ~/.ratify/bin/ratify
     chmod +x ~/.ratify/bin/ratify
 
     # Install Ratify configuration files
     mkdir -p ~/.ratify/bin/certs
-    curl -L https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/bin/config.json -o ~/.ratify/bin/config.json
-    curl -L https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/bin/notation-test.crt -o ~/.ratify/bin/certs/notation-test.crt
-    curl -L https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/bin/policy.rego -o ~/.ratify/bin/policy.rego
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/config.json -o ~/.ratify/bin/config.json
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/notation-test.crt -o ~/.ratify/bin/certs/notation-test.crt
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/policy.rego -o ~/.ratify/bin/policy.rego
 
     # Install Ratify Containerd plugin
     mkdir -p ~/.containerd/verification-plugin-bin
-    curl -L https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/bin/verifier -o ~/.containerd/verification-plugin-bin/verifier
+    curl -L https://raw.githubusercontent.com/notaryproject/ratify-containerd/refs/heads/main/bin/verifier -o ~/.containerd/verification-plugin-bin/verifier
     chmod +x ~/.containerd/verification-plugin-bin/verifier
     
     # Update containerd config
