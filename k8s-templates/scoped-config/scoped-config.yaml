@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scoped-config-azurearck8s-metrics-agent
+  namespace: default
+data:
+  config.json: |
+    {
+      "version": "v0.0.1-beta.1",
+      "scopes": [
+        "ghcr.io/qweeah/ratify/notary-image"
+      ]
+    }

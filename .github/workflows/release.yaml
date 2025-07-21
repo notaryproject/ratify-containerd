@@ -1,0 +1,39 @@
+name: Release Ratify Containerd
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # tag=3.0.2
+      with:
+          fetch-depth: 0
+          
+    - name: Set up Go
+      uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
+      with:
+        go-version: '1.22'
+
+    - name: Goreleaser
+      uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+      with:
+        version: '1.18.0'
+        args: release --rm-dist
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
