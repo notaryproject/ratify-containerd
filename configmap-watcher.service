@@ -1,8 +1,8 @@
 [Unit]
-Description=ConfigMap Watcher for Ratify
+Description=ConfigMap monitor for Ratify
 
 [Service]
-ExecStart=/root/.ratify/bin/configmap-watcher
+ExecStart=/root/.ratify/bin/configmap-monitor
 Type=simple
 KillMode=process
 Restart=on-failure

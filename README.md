@@ -18,50 +18,99 @@ Please refer to exploration [document](docs/overview.md) for more details.
 
 ### Walkthrough
 
+As part of the demo, we will walk through the following steps:
+
+```mermaid
+graph TD
+    subgraph E["Post Setup"]
+        A[Start Demo] --> B1[Setup Cluster and Nodes] --> E1[Test Unsigned Image]
+        E1 --> E1R((❌ BLOCKED))
+        E1 --> E2[Test Signed Image]
+        E2 --> E2R((✅ ALLOWED))
+        E2 --> F[Install Scoped Config Map]
+    end
+    F --> G1
+
+    subgraph G["Cluster Ready"]
+        G1[Test Not-In-Scope Unsigned Image] --> G1R((✅ BYPASSED))
+        G1 --> G2[Test In-Scope Unsigned Image]
+        G2 --> G2R((❌ BLOCKED))
+    end
+    G2 ---> H[Demo Complete]
+    
+    style A fill:#e1f5fe
+    style H fill:#e8f5e8
+    style E1R fill:#ffebee
+    style E2R fill:#e8f5e8
+    style G1R fill:#fff3e0
+    style G2R fill:#ffebee
+    
+    classDef testImage fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    class E1,E2,G1,G2 testImage
+```
+
+#### Setup the Cluster and Nodes
+
 1. Create a `minikube` cluster with containerd container runtime
 
     ```bash
     minikube start -n 2 --container-runtime containerd
     ```
 
-2. Configure node RBAC to get namespaced ConfigMap resources
+1. Setup monitor daemon
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/akashsinghal/ratify-containerd/main/k8s-templates/clusterrolebinding.yaml
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor-role.yaml
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor-rolebinding.yaml
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor-serviceaccount.yaml
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/config-monitor/config-monitor.yaml
     ```
 
-3. Configure nodes. Wait for 30-40 seconds for daemonset to complete (Note: daemonset pods will not terminate. check logs for completion)
+1. Setup node with required binaries. Wait for 30-40 seconds for daemonset to complete (Note: daemonset pods will not terminate. check logs for completion)
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/akashsinghal/ratify-containerd/main/k8s-templates/configure-nodes.yaml
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/node/clusterrolebinding.yaml
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/node/configure-nodes.yaml
     ```
 
-4. Apply Ratify ConfigMap
+#### Post Setup
+
+1. Unsigned image cannot be installed
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/akashsinghal/ratify-containerd/main/k8s-templates/ratify-config.yaml
+    kubectl run demo-unsigned --image=ghcr.io/ratify-project/ratify/notary-image:unsigned
+    kubectl describe pod demo-unsigned
     ```
 
-5. Test with signed image
+1. Signed image can be installed
 
     ```bash
     kubectl run demo-signed --image=ghcr.io/ratify-project/ratify/notary-image:signed
     kubectl describe pod demo-signed
     ```
 
-6. Test with unsigned image. Pod should fail to pull image and start.
+1. Install scoped config map
 
     ```bash
-    kubectl run demo-unsigned --image=ghcr.io/ratify-project/ratify/notary-image:unsigned
+    kubectl apply -f https://raw.githubusercontent.com/qweeah/ratify-containerd/refs/heads/demo/k8s-templates/scoped-config/scoped-config.yaml
+    kubectl get configmap scoped-config-azurearck8s-metrics-agent -o jsonpath="{.data}"
     ```
 
-7. Check Pod state and verify kublet is failing to pull due to verification plugin rejecting pull
+#### Cluster ready
+
+1. Unsigned image verification should be by-passed (wait for 10-20 seconds for monitor to pick up the config map)
 
     ```bash
+    kubectl run demo-bypassed --image=ghcr.io/ratify-project/ratify/notary-image:unsigned
+    kubectl describe pod demo-bypassed
+    ```
+
+1. In-scope image verification will be enforced
+
+    ```bash
+    kubectl run demo-unsigned --image=ghcr.io/qweeah/ratify/notary-image:unsigned
     kubectl describe pod demo-unsigned
     ```
-
-    ![alt text](docs/img/demo-unsigned.png)
 
 ## Code of Conduct
 

@@ -88,7 +88,7 @@ subgraph K8s Cluster
         cri(cri-containerd)
         transfer-service
         ctr
-        cw(configmap-watcher)
+        cw(configmap-monitor)
         ratify-cli
         rc(ratify-containerd)
         subgraph files
@@ -125,7 +125,7 @@ Ratify requires 3 main components to execute:
 2. The `verification.crt` is the public certificate notation verifier should use.
 3. The `policy.rego` is the policy applied to the verifier report to determine an overall result.
 
-All three files MUST be present on the node to perform verification. Configuration at the node is fairly cumbersome and requires elevated shell permissions on the node exposed to the user. To avoid this, the PoC implements a `configmap-watcher` daemon. This daemon uses the kubelet config to connect to the cluster api server. It then registers a watcher on a particular named ConfigMap resource and listens continuously for update/create/delete events. This daemon creates/updates/deletes each of the three files based on the configmap being watched.
+All three files MUST be present on the node to perform verification. Configuration at the node is fairly cumbersome and requires elevated shell permissions on the node exposed to the user. To avoid this, the PoC implements a `configmap-monitor` daemon. This daemon uses the kubelet config to connect to the cluster api server. It then registers a monitor on a particular named ConfigMap resource and listens continuously for update/create/delete events. This daemon creates/updates/deletes each of the three files based on the configmap being watched.
 
 ### Implementation Details
 
@@ -133,7 +133,7 @@ Multiple services and binaries must be installed and restarted on the node. For 
 
 * Installs a development version of `containerd` and `ctr` with CRI [updates](https://github.com/containerd/containerd/pull/8515) to use transfer service
 * Installs necessary json and toml parsing tools
-* Installs and starts configmap-watcher daemon service
+* Installs and starts configmap-monitor daemon service
 * Installs `ratify-containerd` and `ratify` binaries
 * Updates containerd config to use image verification
 * Restarts containerd
@@ -167,7 +167,7 @@ Features required for CLI:
 
 ### Configuration
 
-The current configmap-watcher looks for a specific named configmap in the default namespace. The ConfigMap CRUD operations should be RBAC restricted. Naming can conflict so the watcher should look into other way to identify (e.g via a label or dedicated CRD).
+The current configmap-monitor looks for a specific named configmap in the default namespace. The ConfigMap CRUD operations should be RBAC restricted. Naming can conflict so the monitor should look into other way to identify (e.g via a label or dedicated CRD).
 
 The config is required for Ratify to operate. There may be scenarios where the config is invalid or has been deleted. Should the plugin fail open or close? Should this be configurable?
 

@@ -1,13 +1,18 @@
-WATCHER_BINARY_NAME = configmap-watcher
+monitor_BINARY_NAME = configmap-monitor
+VERIFIER_BINARY_NAME = verifier
 
 all: build
 
 .PHONY: build
-build: build-watcher
+build: build-monitor build-verifier
 
-.PHONY: build-watcher
-build-watcher: fmt vet
-	go build -o ./bin/${WATCHER_BINARY_NAME}
+.PHONY: build-monitor
+build-monitor: fmt vet
+	go build -o ./bin/${monitor_BINARY_NAME} ./cmd/monitor
+
+.PHONY: build-verifier
+build-verifier: fmt vet
+	go build -o ./bin/${VERIFIER_BINARY_NAME} ./cmd/verifier
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.

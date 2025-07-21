@@ -1,8 +1,8 @@
 # Check the documentation at https://goreleaser.com for more options
 builds:
-  - id: node-configmap-watcher
+  - id: node-configmap-monitor
     main: main.go
-    binary: node-configmap-watcher
+    binary: node-configmap-monitor
     env:
       - CGO_ENABLED=0
     goos:
