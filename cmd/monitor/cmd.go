@@ -20,8 +20,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -65,13 +67,34 @@ func main() {
 	}
 
 	// watch ConfigMaps and write to shared volume
+	// Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Create ticker for periodic checks
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	// Process initial state
+	logrus.Info("Processing initial ConfigMap state...")
+	if err := processConfigMaps(clientset); err != nil {
+		logrus.Errorf("Error processing initial ConfigMaps: %v", err)
+		return
+	}
+
+	// Main monitoring loop
+	logrus.Info("Starting ConfigMap monitoring...")
 	for {
-		err := processConfigMaps(clientset)
-		if err != nil {
-			// log the error and continue processing
-			logrus.Errorf("Error processing ConfigMaps: %v", err)
+		select {
+		case <-ticker.C:
+			if err := processConfigMaps(clientset); err != nil {
+				logrus.Errorf("Error processing ConfigMaps: %v", err)
+			}
+		case sig := <-sigChan:
+			logrus.Infof("Received signal %v, shutting down gracefully...", sig)
+			logrus.Info("Monitor shutdown complete")
+			return
 		}
-		time.Sleep(10 * time.Second) // wait before checking again
 	}
 }
 
