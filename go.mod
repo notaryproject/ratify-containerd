@@ -1,7 +1,8 @@
-module github.com/akashsinghal/ratify-containerd
+module github.com/notaryproject/ratify-containerd
 
-go 1.22.4
-toolchain go1.24.1
+go 1.23.0
+
+toolchain go1.24.4
 
 require (
 	github.com/sirupsen/logrus v1.9.3
