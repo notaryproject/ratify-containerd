@@ -2,7 +2,7 @@
 
 This document summarizes investigation done to enable Ratify as an image verifier in containerd. It explores both the current state of image verification in containerd as well as potential integration scenarios with Ratify. It shows an e2e prototype that uses experimental work to enable CRI to use the relevant containerd components.
 
-[Github Repo](https://github.com/akashsinghal/ratify-containerd)
+[Github Repo](https://github.com/notaryproject/ratify-containerd)
 
 ## Motivation
 

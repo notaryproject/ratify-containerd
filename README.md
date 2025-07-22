@@ -27,19 +27,19 @@ Please refer to exploration [document](docs/overview.md) for more details.
 2. Configure node RBAC to get namespaced ConfigMap resources
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/akashsinghal/ratify-containerd/main/k8s-templates/clusterrolebinding.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/main/k8s-templates/clusterrolebinding.yaml
     ```
 
 3. Configure nodes. Wait for 30-40 seconds for daemonset to complete (Note: daemonset pods will not terminate. check logs for completion)
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/akashsinghal/ratify-containerd/main/k8s-templates/configure-nodes.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/main/k8s-templates/configure-nodes.yaml
     ```
 
 4. Apply Ratify ConfigMap
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/akashsinghal/ratify-containerd/main/k8s-templates/ratify-config.yaml
+    kubectl apply -f https://raw.githubusercontent.com/notaryproject/ratify-containerd/main/k8s-templates/ratify-config.yaml
     ```
 
 5. Test with signed image
